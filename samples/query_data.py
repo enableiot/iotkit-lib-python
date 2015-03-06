@@ -37,11 +37,12 @@ acct = iotkitclient.Account(iot)
 try:
     # Check if account exists
     acct.get_account(config.account_name)
-except Exception, err:    
+except Exception, err:
     raise RuntimeError("Unable to find account %s" % str(err))
-    
+
 device_id = iot.user_id + "_01"
 device = iotkitclient.Device(acct, device_id)
+
 comp = iotkitclient.Component(device)
 comp.get_component(config.component_name)
 
@@ -49,6 +50,7 @@ t0 = 0
 t1 = None
 devices = [device_id]
 components = [comp.id]
+
 data = acct.search_data(t0, t1, devices, components, csv=False)
 print "\nSimple query..."
 iotkitclient.prettyprint(data)
@@ -59,49 +61,41 @@ iotkitclient.prettyprint(data)
 
 print "\nAdvanced query..."
 # filters = {
-    # "gatewayIds" : ["<gid1>", "<gid2>"],
-    # "deviceIds" : ["<did1>", "<did2>"],
-    # "componentIds" : ["<cid1>", "<cid2>"],
-    # "from" :  <start_datetime>,
-    # "to" :  <end_datetime>,
-    # "returnedMeasureAttributes" : ["att_1", "att_2"],
-    # "showMeasureLocation" :  <true/false>,
-        # "aggregations":<include/exclude/only>,
-    # "devCompAttributeFilter" : {
-        # "filterName1" : ["filter_value1", "filter_value2"],
-        # "filterName2" : ["filter_value1", "filter_value2"]
-    # },
-    # "measurementAttributeFilter" : {
-        # "filterName1" : ["filter_value1", "filter_value2"],
-        # "filterName2" : ["filter_value1", "filter_value2"]
-    # },
-    # "valueFilter" : {
-        # "value" : ["filter_value1", "filter_value2"]
-    # },
-    # "componentRowLimit" :  <limit_value>,
-    # "countOnly" :  <true/false>,
-    # "sort" : [{
-            # "sortField1" : "<sort_order>"
-        # }, {
-            # "sortField2" : "<sort_order>"
-        # }       
-    # ]
+# "gatewayIds" : ["<gid1>", "<gid2>"],
+# "deviceIds" : ["<did1>", "<did2>"],
+# "componentIds" : ["<cid1>", "<cid2>"],
+# "from" :  <start_datetime>,
+# "to" :  <end_datetime>,
+# "returnedMeasureAttributes" : ["att_1", "att_2"],
+# "showMeasureLocation" :  <true/false>,
+# "aggregations":<include/exclude/only>,
+# "devCompAttributeFilter" : {
+# "filterName1" : ["filter_value1", "filter_value2"],
+# "filterName2" : ["filter_value1", "filter_value2"]
+# },
+# "measurementAttributeFilter" : {
+# "filterName1" : ["filter_value1", "filter_value2"],
+# "filterName2" : ["filter_value1", "filter_value2"]
+# },
+# "valueFilter" : {
+# "value" : ["filter_value1", "filter_value2"]
+# },
+# "componentRowLimit" :  <limit_value>,
+# "countOnly" :  <true/false>,
+# "sort" : [{
+# "sortField1" : "<sort_order>"
+# }, {
+# "sortField2" : "<sort_order>"
+# }
+# ]
 # }
 filters = {
-            "from" :  0,
-            "devCompAttributeFilter" : {
-                "componentType" : ["temperature.v1.0"]
-            },
-            "componentRowLimit" :  1,
-            "sort" : [{"Timestamp" : "Desc"}]
-        }
+    "from":  0,
+    "devCompAttributeFilter": {
+        "componentType": ["temperature.v1.0"]
+    },
+    "componentRowLimit":  1,
+    "sort": [{"Timestamp": "Desc"}]
+}
 data = acct.advanced_data_query(filters)
 iotkitclient.prettyprint(data)
-
-
-
-    
-
-    
-    
-    

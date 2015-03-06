@@ -33,9 +33,10 @@ import json
 import uuid
 import os.path
 import time
+from connect import Connect
 
 
-class Device:
+class Device(object):
     device_id = None
     client = None
     account = None
@@ -44,26 +45,29 @@ class Device:
     # name = None
     info = None
 
-    def __init__(self, account, id=None):
+    def __init__(self, account=None, id=None, client=None):
         if account:
             self.client = account.client
             self.account = account
-            self.proxies = self.client.proxies
             self.account_id = self.account.id
             if id:
                 self.device_id = id
                 try:
                     js = self.get_device()
-                except Exception, e:
-                    raise ValueError("Device ID not found: ", id)
+                except Exception, err:
+                    raise ValueError("Device ID not found: %s" % str(err))
+        elif client:
+            self.client = client
+        else:
+            raise ValueError("Account or connection object required.")
 
     def create_device(self, device_info, activate=False):
         if device_info:
             url = "{0}/accounts/{1}/devices".format(
-                globals.base_url, self.account_id)
+                self.client.base_url, self.account_id)
             data = json.dumps(device_info)
             resp = requests.post(url, data=data, headers=get_auth_headers(
-                self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 201)
             js = resp.json()
             self.device_id = js["deviceId"]
@@ -84,25 +88,28 @@ class Device:
             self.info = data
             self.device_id = self.info["deviceId"]
             self.device_token = self.info["device_token"]
+            self.account_id = self.info["account_id"]
             js.close()
             return data
         else:
             raise ValueError("Config file not found: ", configFile)
 
     def save_config(self, configFile, overWrite=False):
-        if self.info:
+        if self.device_id:
             data = self.get_device()
             data["device_token"] = self.device_token
-            # prettyprint(data)
+            data["account_id"] = self.account_id
         else:
             raise ValueError("Unknown device - no configuration to save.")
+
         try:
             if os.path.isfile(configFile) and not overWrite:
                 raise RuntimeError(
                     "Cannot overwrite existing token file:", configFile)
             else:
                 with open(configFile, 'w') as configFile:
-                    json.dump(data, configFile)
+                    json.dump(
+                        data, configFile, sort_keys=True, indent=4, separators=(',', ': '))
         except:
             raise RuntimeError("Error writing token:", configFile)
 
@@ -110,36 +117,36 @@ class Device:
         if not device_id:
             device_id = self.device_id
         url = "{0}/accounts/{1}/devices/{2}".format(
-            globals.base_url, self.account_id, device_id)
+            self.client.base_url, self.account_id, device_id)
         resp = requests.get(url, headers=get_auth_headers(
-            self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
+            self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
         self.device_id = js["deviceId"]
         #update_properties(self, js)
         self.info = js
         return js
-        
+
     # --- Not functional ----
     # def search_devices(self, searchterms):
         # if searchterms:
-            # url = "{0}/accounts/{1}/devices?{2}".format(
-                # globals.base_url, self.account_id, searchterms)
-            # resp = requests.get(url, headers=get_auth_headers(
-                # self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
-            # check(resp, 200)
-            # js = resp.json()
-            # return js
+        # url = "{0}/accounts/{1}/devices?{2}".format(
+        # self.client.base_url, self.account_id, searchterms)
+        # resp = requests.get(url, headers=get_auth_headers(
+        # self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+        # check(resp, 200)
+        # js = resp.json()
+        # return js
         # return None
 
     def update_device(self, device_info, device_id=None):
         if not device_id:
             device_id = self.device_id
         url = "{0}/accounts/{1}/devices/{2}".format(
-            globals.base_url, self.account_id, device_id)
+            self.client.base_url, self.account_id, device_id)
         data = json.dumps(device_info)
         resp = requests.put(url, data=data, headers=get_auth_headers(
-            self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
+            self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
         #update_properties(self, js)
@@ -148,13 +155,13 @@ class Device:
 
     def activate_new_device(self, activation_code):
         url = "{0}/accounts/{1}/devices/{2}/activation".format(
-            globals.base_url, self.account_id, self.device_id)
+            self.client.base_url, self.account_id, self.device_id)
         activation = {
             "activationCode": activation_code
         }
         data = json.dumps(activation)
         resp = requests.put(url, data=data, headers=get_auth_headers(
-            self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
+            self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
         self.device_token = js["deviceToken"]
@@ -165,9 +172,9 @@ class Device:
             device_id = self.device_id
         if device_id:
             url = "{0}/accounts/{1}/devices/{2}".format(
-                globals.base_url, self.account_id, device_id)
+                self.client.base_url, self.account_id, device_id)
             resp = requests.delete(url, headers=get_auth_headers(
-                self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 204)
             self.device_id = None
             self.info = None
@@ -206,33 +213,33 @@ class Device:
 
         """
         url = "{0}/accounts/{1}/devices".format(
-            globals.base_url, self.account_id)
+            self.client.base_url, self.account_id)
         resp = requests.get(url, headers=get_auth_headers(
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
         return js
-        
+
     def get_tags(self):
         url = "{0}/accounts/{1}/devices/tags".format(
-            globals.base_url, self.account_id)
+            self.client.base_url, self.account_id)
         resp = requests.get(url, headers=get_auth_headers(
-            self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
+            self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
         return js
 
     def get_attributes(self):
         url = "{0}/accounts/{1}/devices".format(
-            globals.base_url, self.account_id)
+            self.client.base_url, self.account_id)
         resp = requests.get(url, headers=get_auth_headers(
-            self.client.user_token), proxies=self.proxies, verify=globals.g_verify)
+            self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
         return js
 
     def send_data(self, dataSeries):
-        url = "{0}/data/{1}".format(globals.base_url, self.device_id)
+        url = "{0}/data/{1}".format(self.client.base_url, self.device_id)
         print url
         payload = {
             "on": time.time(),
@@ -241,7 +248,7 @@ class Device:
         }
         data = json.dumps(payload)
         resp = requests.post(url, data=data, headers=get_auth_headers(
-            self.device_token), proxies=self.proxies, verify=globals.g_verify)
+            self.device_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 201)
         return resp.text
 

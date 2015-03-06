@@ -27,52 +27,44 @@
 import iotkitclient
 import config
 import time
+import json
 
-# Connect to IoT Analytics site and authenticate
-print "Connecting to %s ..." % config.hostname
-iot = iotkitclient.Connect(host=config.hostname, proxies=config.proxies)
+# Connect and login to the IoT cloud
+iot = iotkitclient.Connect(host=config.hostname)
 iot.login(config.username, config.password)
-print "Connected. User ID: %s ..." % iot.user_id
-
-# Link to a specific IoT Analytics account
+print "*** Connected. User ID: %s ..." % iot.user_id
 acct = iotkitclient.Account(iot)
-try:
-    acct.get_account(config.account_name)
-except:
-    acct.create_account(config.account_name)
-    iot.reinit(config.username, config.password)
-print "Using Account: %s ..." % config.account_name
+acct.get_account(config.account_name)
+print "*** Using Account: %s (%s)" % (acct.id, config.account_name)
+invite = iotkitclient.Invites(acct)
 
-# Link to a specific device in the account
-device = iotkitclient.Device(acct)
-device_id = iot.user_id + "_01"
-try:
-    device.get_device(device_id)
-except Exception, ex:
-    raise RuntimeError(str(err))
+# Delete any pending invites
+invite_list = invite.get_account_invites()
+for user_email in invite_list:
+    invite.delete_invites(user_email)
+    print "  *** Deleted old invites for", user_email
 
-device.load_config("device.json")
-print "Using Device: %s ..." % device_id
+# Invite user to the account_name
+print "*** Adding invite for:", config.invitee_email
+invite.add_invite(config.invitee_email)
 
-comp = iotkitclient.Component(device)
-if not comp.get_component(config.component_name):
-    comp.add_component(config.component_name, config.component_type)
+# Display list of pending invites
+invite_list = invite.get_account_invites()
+print "*** Pending invites for Account: %s" % config.account_name
+for email in invite_list:
+    print "   %s" % email
 
-print "Using Component: %s (%s) ..." % (config.component_name, comp.id)
+# Connect and login to IoT cloud as invitee
+iot2 = iotkitclient.Connect(host=config.hostname)
+iot2.login(config.invitee_email, config.invitee_password)
+acct2 = iotkitclient.Account(iot2)
+invite2 = iotkitclient.Invites(acct2)
 
-data = [
-    (int(time.time() * 1000 - 500), "65.3"),
-    (int(time.time() * 1000 - 400), "57.5"),
-    (int(time.time() * 1000 - 300), "61.4"),
-    (int(time.time() * 1000 - 200), "59.2"),
-    (int(time.time() * 1000 - 100), "66.5"),
-    (int(time.time() * 1000), "65.3")
-]
-dataseries = device.package_data_series(data, comp.id)
-device.send_data(dataseries)
-print "Submitted data: "
-iotkitclient.prettyprint(dataseries)
-
-# save latest device-info
-device.get_device(device_id)
-device.save_config("device.json", True)
+# find invite and accept
+invite_list = invite2.get_user_invites(config.invitee_email)
+for item in invite_list:
+    invite_id = item["_id"]
+    print "*** Accepting invite:", invite_id
+    iotkitclient.prettyprint(invite2.accept_invite(invite_id))
+    print "*** Deleting invites for:", config.invitee_email
+    iotkitclient.prettyprint(invite.delete_invites(config.invitee_email))

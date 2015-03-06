@@ -42,7 +42,7 @@ try:
     device_id = iot.user_id + "_01"
     try:
         device.get_device(device_id)
-        
+
         # Delete all components named "temp" on this device
         comp = iotkitclient.Component(device)
         while True:
@@ -51,15 +51,15 @@ try:
                 print "Deleting component \"%s\" (%s)" % (config.component_name, comp.id)
                 comp.delete_component(comp.id)
             except:
-                break 
+                break
 
         # Delete device
         print "Deleting device \"%s\"" % device_id
         device.delete_device(device_id)
-        
-    except:        
+
+    except:
         print "Cannot find device: %s ..." % device_id
-        
+
     # Delete account
     print "Deleting account \"%s\" (%s)" % (config.account_name, acct.id)
     acct.delete_account(acct.id)

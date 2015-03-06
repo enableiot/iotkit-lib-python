@@ -23,7 +23,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""@package Client
+"""@package Connect
 Methods for IoT Analytics Cloud connections
 
 """
@@ -32,7 +32,8 @@ import globals
 import json
 import requests
 
-class Connect:
+
+class Connect(object):
 
     """ IoT Analytics Cloud connection class
 
@@ -45,8 +46,8 @@ class Connect:
     user_token = ''
     user_id = ''
     base_url = globals.base_url
-    
-    def __init__(self, host=None, proxies=None):
+
+    def __init__(self, host, proxies=None, username=None, password=None):
         """ Creates IoT Analytics user session and sets up connection
         information (host, proxy connections)
 
@@ -59,15 +60,19 @@ class Connect:
         """
         if host:
             self.base_url = "https://{0}{1}".format(host, globals.api_root)
-            
+
         if proxies:
             self.proxies = proxies
         # test the connection
         try:
             js = self.get_version()
         except Exception, err:
-            raise RuntimeError("Connection to %s failed: %s" % (self.base_url, str(err)))
-        
+            raise RuntimeError(
+                "Connection to %s failed: %s" % (self.base_url, str(err)))
+
+        if username and password:
+            self.login(username, password)
+
     def login(self, username, password):
         """ Submit IoT Analytics user credentials to obtain the access token
 
@@ -78,7 +83,7 @@ class Connect:
 
         Returns:
         Sets user_id and user_token attributes for connection instance
-        
+
         """
         if not username or not password:
             raise ValueError(

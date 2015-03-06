@@ -27,12 +27,13 @@
 Methods for IoT Analytics account management
 """
 import globals
-from utils import check, get_auth_headers, update_properties
+from utils import check, get_auth_headers, update_properties, prettyprint
 import requests
 import json
 
 
 class Account:
+
     """ Create IoT Account instance
 
         Args:
@@ -72,7 +73,7 @@ class Account:
         """
 
         if account_name:
-            url = "{0}/accounts".format(globals.base_url)
+            url = "{0}/accounts".format(self.client.base_url)
             payload = {"name": account_name}
             data = json.dumps(payload)
             resp = requests.post(url, data=data, headers=get_auth_headers(
@@ -80,7 +81,7 @@ class Account:
             check(resp, 201)
             js = resp.json()
             self.id = js["id"]
-            #update_properties(self, js)  # save account properties
+            # update_properties(self, js)  # save account properties
             self.info = js
             return js
         else:
@@ -103,7 +104,8 @@ class Account:
             # given a user_id, get the account_id of the associated account with account_name
             # if there are multiple accounts with the same name, return one of
             # them
-            url = "{0}/users/{1}".format(globals.base_url, self.client.user_id)
+            url = "{0}/users/{1}".format(self.client.base_url,
+                                         self.client.user_id)
             resp = requests.get(url, headers=get_auth_headers(
                 self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 200)
@@ -152,12 +154,12 @@ class Account:
 
         """
 
-        url = "{0}/accounts/{1}".format(globals.base_url, self.id)
+        url = "{0}/accounts/{1}".format(self.client.base_url, self.id)
         resp = requests.get(url, headers=get_auth_headers(
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
-        #update_properties(self, js)  # save account properties
+        # update_properties(self, js)  # save account properties
         self.info = js
         return js
 
@@ -173,12 +175,12 @@ class Account:
         """
         data = json.dumps(acct_info)
         if acct_info:
-            url = "{0}/accounts/{1}".format(globals.base_url, self.id)
+            url = "{0}/accounts/{1}".format(self.client.base_url, self.id)
             resp = requests.put(url, data=data, headers=get_auth_headers(
                 self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 200)
             js = resp.json()
-            #update_properties(self, js)  # save account properties
+            # update_properties(self, js)  # save account properties
             self.info = js
             return js
         else:
@@ -198,7 +200,7 @@ class Account:
 
         """
         url = "{0}/accounts/{1}/activationcode".format(
-            globals.base_url, self.id)
+            self.client.base_url, self.id)
         resp = requests.get(url, headers=get_auth_headers(
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
@@ -218,7 +220,7 @@ class Account:
 
         """
         url = "{0}/accounts/{1}/activationcode/refresh".format(
-            globals.base_url, self.id)
+            self.client.base_url, self.id)
         resp = requests.put(url, headers=get_auth_headers(
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
@@ -236,7 +238,7 @@ class Account:
 
         """
         if account_id:
-            url = "{0}/accounts/{1}".format(globals.base_url, account_id)
+            url = "{0}/accounts/{1}".format(self.client.base_url, account_id)
             resp = requests.delete(url, headers=get_auth_headers(
                 self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 204)
@@ -264,7 +266,7 @@ class Account:
                 ]
 
         """
-        url = "{0}/accounts/{1}/users".format(globals.base_url, self.id)
+        url = "{0}/accounts/{1}/users".format(self.client.base_url, self.id)
         resp = requests.get(url, headers=get_auth_headers(
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
@@ -282,6 +284,9 @@ class Account:
             token = data["deviceToken"]
         return token
 
+    ###############################################
+    # Data API
+    ###############################################
     def search_data(self, time0, time1, devices, components, csv=None):
         """ Retrieve data for a list of devices and components in a
             given time period.
@@ -327,7 +332,8 @@ class Account:
 
         """
 
-        url = "{0}/accounts/{1}/data/search".format(globals.base_url, self.id)
+        url = "{0}/accounts/{1}/data/search".format(
+            self.client.base_url, self.id)
         if csv:
             url = url + "?output=csv"
         payload = {
@@ -354,21 +360,21 @@ class Account:
 
     def advanced_data_query(self, payload):
         """ Advanced data query supports multiple filters and sorting options
-        
+
             Args:
             payload (dict): dict containing iotkit REST API advanced-search
             parameters.
 
             Returns:
             JSON message containing returned data set
-            
+
             See the Advanced Data Inquiry page on the iotkit REST API wiki for
             request and response message formats
             https://github.com/enableiot/iotkit-api/wiki/Advanced-Data-Inquiry
-            
-        """     
+
+        """
         url = "{0}/accounts/{1}/data/search/advanced".format(
-            globals.base_url, self.id)
+            self.client.base_url, self.id)
 
         data = json.dumps(payload)
         resp = requests.post(url, data=data, headers=get_auth_headers(
@@ -379,20 +385,21 @@ class Account:
 
     def aggregated_report(self, payload):
         """ Return aggregated data report
-        
+
             Args:
             payload (dict): dict containing iotkit REST API advanced-search
             parameters.
 
             Returns:
             JSON message containing returned data set
-            
+
             See the Aggregated Report interface page on the iotkit REST API
             wiki for request and response message formats.
             https://github.com/enableiot/iotkit-api/wiki/Aggregated-Report-Interface
-            
+
         """
-        url = "{0}/accounts/{1}/data/report".format(globals.base_url, self.id)
+        url = "{0}/accounts/{1}/data/report".format(
+            self.client.base_url, self.id)
 
         data = json.dumps(payload)
         # print url, data
@@ -402,4 +409,31 @@ class Account:
         js = resp.json()
         return js
 
-    
+    ###############################################
+    # Control API
+    ###############################################
+    def send_control_msg(self, payload):
+        """ Send control message to device
+
+        """
+        url = "{0}/accounts/{1}/control".format(
+            self.client.base_url, self.id)
+        data = json.dumps(payload)
+        resp = requests.post(url, data=data, headers=get_auth_headers(
+            self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+        check(resp, 200)
+
+    def list_control_msgs(self, device_id, start_time=0):
+        """ List control messages sent to device
+
+        """
+        if device_id and start_time is not None:
+            url = "{0}/accounts/{1}/control/devices/{2}?from={3}".format(
+                self.client.base_url, self.id, device_id, start_time)
+            resp = requests.get(url, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+            js = resp.json()
+            return js
+        else:
+            raise ValueException("device_id and start_time required")

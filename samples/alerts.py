@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (c) 2015, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -23,36 +24,29 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys
+# Get list of alerts and print details for each one
+
+import iotkitclient
+import config
+import time
 import json
-import os
-import errors
+import utils
 
+iot = iotkitclient.Connect(host=config.hostname)
+iot.login(config.username, config.password)
+print "*** Connected. User ID: %s ..." % iot.user_id
 
-def check(resp, code):
-    if resp.status_code != code:
-        raise RuntimeError(
-            "Expected {0}. Got {1} {2}".format(code, resp.status_code, resp.text))
+acct = iotkitclient.Account(iot)
+acct.get_account(config.account_name)
+print "*** Using Account: %s (%s)" % (acct.id, config.account_name)
 
-
-def get_auth_headers(token=None):
-    headers = {
-        #'Authorization': 'Bearer ' + token,
-        'content-type': 'application/json'
-    }
-    if token:
-        headers["Authorization"] = 'Bearer ' + token
-    return headers
-
-
-def prettyprint(js):
-    print json.dumps(js, sort_keys=True, indent=4, separators=(',', ': '))
-
-
-def update_properties(obj, var):
-    if obj and var:
-        for key, value in var.items():
-            setattr(obj, key, value)
-    else:
-        raise ValueError("Invalid object %s or dictionary." %
-                         (obj.__name__))
+alert = iotkitclient.Alert(acct)
+alerts = alert.get_alerts()
+print "*** Alerts (%d):" % len(alerts)
+for a in alerts:
+    id = a["alertId"]
+    triggered = int(a["triggered"]) / 1000
+    status = a["status"]
+    print "--- Alert", id, status, utils.unix_to_realtime(int(triggered))
+    iotkitclient.prettyprint(alert.get_alert(id))
+    # alert.reset_alert(id)

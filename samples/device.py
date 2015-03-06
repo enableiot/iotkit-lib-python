@@ -37,9 +37,9 @@ acct = iotkitclient.Account(iot)
 try:
     # Check if account exists
     acct.get_account(config.account_name)
-except Exception, err:    
+except Exception, err:
     raise RuntimeError("Unable to find account %s" % str(err))
-    
+
 # Link-to/Create a specific device in the account
 device = iotkitclient.Device(acct)
 device_id = iot.user_id + "_01"
@@ -50,10 +50,10 @@ try:
 except:
     # Define required device info parameters
     device_info = {
-                    "deviceId": device_id, 
-                    "gatewayId": device_id,
-                    "name": "Device #1"
-                  }
+        "deviceId": device_id,
+        "gatewayId": device_id,
+        "name": "Device #1"
+    }
     # Create device
     print "Creating new device:", device_id
     device.create_device(device_info)
@@ -64,20 +64,21 @@ except:
     # Save device token to file **DO NOT LOSE THIS TOKEN**
     print "Writing device token to device.json..."
     device.save_config("device.json", True)
-    
+
 print "Device Info:"
 iotkitclient.prettyprint(device.get_device())
 
 print "Update Device Info:"
 device_info = {
-                "name": "Just changed my name"
-              }
+    "name": "Just changed my name"
+}
 device.update_device(device_info, device_id)
 iotkitclient.prettyprint(device.get_device())
 
-
-    
-
-    
-    
-    
+# Add/find a component
+comp = iotkitclient.Component(device)
+if comp.get_component(config.component_name):
+    print "Found component:", comp.id
+else:
+    comp.add_component(config.component_name, config.component_type)
+    print "Created component:", comp.id

@@ -27,10 +27,24 @@
 import iotkitclient
 import config
 import time
+import json
+
+# actuation message bodymsg
+msg = {
+    "complexCommands": [],
+    "commands": [{
+        "transport": "ws",
+        "componentId": None,
+        "parameters": [{
+            "name": "LED",
+                    "value": None
+        }]
+    }]
+}
 
 # Connect to IoT Analytics site and authenticate
 print "Connecting to %s ..." % config.hostname
-iot = iotkitclient.Connect(host=config.hostname, proxies=config.proxies)
+iot = iotkitclient.Connect(host=config.hostname)
 iot.login(config.username, config.password)
 print "Connected. User ID: %s ..." % iot.user_id
 
@@ -43,36 +57,44 @@ except:
     iot.reinit(config.username, config.password)
 print "Using Account: %s ..." % config.account_name
 
+device_id = iot.user_id + "_01"
+
 # Link to a specific device in the account
 device = iotkitclient.Device(acct)
-device_id = iot.user_id + "_01"
 try:
     device.get_device(device_id)
-except Exception, ex:
-    raise RuntimeError(str(err))
+except:
+    device_info = {
+        "deviceId": device_id,
+        "gatewayId": device_id,
+        "name": "Device #1"
+    }
+    device.create_device(device_info)
+    act_code = acct.renew_activation_code()
+    device.activate_new_device(act_code)
+    device.save_config("device.json", True)
 
 device.load_config("device.json")
 print "Using Device: %s ..." % device_id
 
+# Set up actuator component - if it doesn't exist
+cname = "motor"
+ctype = "powerswitch.v1.0"
 comp = iotkitclient.Component(device)
-if not comp.get_component(config.component_name):
-    comp.add_component(config.component_name, config.component_type)
+if comp.get_component(cname):
+    print "Found component:", comp.id
+else:
+    comp.add_component(cname, ctype)
 
-print "Using Component: %s (%s) ..." % (config.component_name, comp.id)
+# Set up actuation message
+msg["commands"][0]["componentId"] = str(comp.id)
+msg["commands"][0]["parameters"][0]["value"] = "1"
+print "*** Sending actuation message:"
+iotkitclient.prettyprint(msg)
+acct.send_control_msg(msg)
 
-data = [
-    (int(time.time() * 1000 - 500), "65.3"),
-    (int(time.time() * 1000 - 400), "57.5"),
-    (int(time.time() * 1000 - 300), "61.4"),
-    (int(time.time() * 1000 - 200), "59.2"),
-    (int(time.time() * 1000 - 100), "66.5"),
-    (int(time.time() * 1000), "65.3")
-]
-dataseries = device.package_data_series(data, comp.id)
-device.send_data(dataseries)
-print "Submitted data: "
-iotkitclient.prettyprint(dataseries)
-
-# save latest device-info
-device.get_device(device_id)
-device.save_config("device.json", True)
+# List actuation history for this device
+print "*** Listing actuation history:"
+start_time = 0
+js = acct.list_control_msgs(device_id, start_time)
+iotkitclient.prettyprint(js)

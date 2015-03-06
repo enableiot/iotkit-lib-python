@@ -23,12 +23,19 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-username = "bbaltz@yahoo.com"
-password = "Passw0rd"
+# IoT Analytics server info#
 hostname = "dashboard.us.enableiot.com"
 proxies = None
 
-account_name = "newacct"
+# user account to use
+username = ""
+password = ""
+
+account_name = "test_acct"
 
 component_name = "temp"
 component_type = "temperature.v1.0"
+
+# user to invite to test account_name
+invitee_email = ""
+invitee_password = ""

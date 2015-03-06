@@ -29,35 +29,66 @@ import requests
 import uuid
 import json
 
+
 class Alert:
 
     def __init__(self, acct):
         self.client = acct.client
         self.account = acct
 
-    #Get alerts for an account
+    # Get alerts for an account
     def get_alerts(self):
         url = "{0}/accounts/{1}/alerts".format(
-            globals.base_url, self.account.id)
+            self.client.base_url, self.account.id)
         resp = requests.get(url, headers=get_auth_headers(
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
         return js
-        
-    #Get alert information - for a specific alert
-    def get_alert(self):
-        pass
-    # Create a new alert
-    def add_alert(self):
-        pass
-    # Reset alert
-    def reset_alert(self):
-        pass
-    # Update alert status
-    def update_alert_status(self):
-        pass
-    # Add comments to an alert
-    def add_alert_comment(self):
-        pass
 
+    # Get alert information - for a specific alert
+    def get_alert(self, alert_id):
+        if alert_id is not None:
+            url = "{0}/accounts/{1}/alerts/{2}".format(
+                self.client.base_url, self.account.id, alert_id)
+            resp = requests.get(url, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+            js = resp.json()
+            return js
+        else:
+            raise ValueError("alert-ID required.")
+
+    # Reset alert
+    def reset_alert(self, alert_id):
+        if alert_id is not None:
+            url = "{0}/accounts/{1}/alerts/{2}/reset".format(
+                self.client.base_url, self.account.id, alert_id)
+            resp = requests.put(url, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+        else:
+            raise ValueError("alert-ID required.")
+
+    # Update alert status
+    def update_alert_status(self, alert_id, alert_status):
+        if alert_id is not None and alert_status is not None:
+            url = "{0}/accounts/{1}/alerts/{2}/status/{3}".format(
+                self.client.base_url, self.account.id, alert_id, alert_status)
+            resp = requests.put(url, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+        else:
+            raise ValueError("alert-ID and status are required.")
+
+    # Add comments to an alert
+    def add_alert_comment(self, alert_id, alert_comment):
+        if alert_id is not None and alert_comment is not None:
+            url = "{0}/accounts/{1}/alerts/{2}/comments".format(
+                self.client.base_url, self.account.id, alert_id, alert_status)
+            data = json.sumps(alert_comment)
+            resp = requests.post(url, data=data, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+        else:
+            raise ValueError("alert-ID and comment are required.")

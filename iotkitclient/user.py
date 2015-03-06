@@ -126,15 +126,15 @@ class User:
         if firstAccountOnly:
             return accounts[0]
         return accounts
-        
+
     def change_password(self):
         pass
-        
+
     def update_user_role(self):
         pass
-        
+
     def reset_password(self):
         pass
-        
+
     def request_password_reset(self):
         pass

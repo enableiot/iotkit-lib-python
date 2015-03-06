@@ -29,6 +29,8 @@ from account import Account
 from user import User
 from data import Data
 from rule import Rule
+from alert import Alert
+from invites import Invites
 from component import Component
 from utils import prettyprint, update_properties
 import json

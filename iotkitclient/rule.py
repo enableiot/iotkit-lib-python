@@ -29,8 +29,10 @@ import requests
 import uuid
 import json
 
+
 class Rule:
     rule_id = None
+    info = None
 
     def __init__(self, acct):
         self.client = acct.client
@@ -45,16 +47,16 @@ class Rule:
         check(resp, 200)
         js = resp.json()
         return js
-        
+
     def find_rule(self, rule_name):
         """ Create a rule as a draft """
-        js = self.list_rules()
+        js = self.get_rules()
         for row in js:
             print row["name"]
             if row["name"] == rule_name:
                 prettyprint(row)
                 return row["externalId"]
-        
+
     def add_draft_rule(self, rule_info):
         """ Create a rule as a draft """
         if rule_info:
@@ -67,10 +69,33 @@ class Rule:
             js = resp.json()
         else:
             raise ValueError("No rule information provided.")
+
     def delete_draft_rule(self, rule_id):
         """ Delete a draft rule """
+        if rule_id:
+            url = "{0}/accounts/{1}/rules/{2}".format(
+                self.client.base_url, self.account.id, rule_id)
+            resp = requests.delete(url, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 204)
+        else:
+            raise ValueError("No rule ID provided.")
+
     def get_rule(self, rule_id):
         """ Get single rule """
+        if rule_id:
+            url = "{0}/accounts/{1}/rules/{2}".format(
+                self.client.base_url, self.account.id, rule_id)
+            resp = requests.get(url, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+            js = resp.json()
+            self.rule_id = rule_id
+            self.info = js
+            return js
+        else:
+            raise ValueError("No rule ID provided.")
+
     def add_rule(self, rule_info):
         """ Create a rule """
         if rule_info:
@@ -83,7 +108,7 @@ class Rule:
             js = resp.json()
         else:
             raise ValueError("No rule information provided.")
-            
+
     def update_rule(self, rule_info):
         """ Update a rule """
         if rule_info:
@@ -96,13 +121,13 @@ class Rule:
             js = resp.json()
         else:
             raise ValueError("No rule information provided.")
-            
+
     def update_rule_status(self, rule_status):
         """ Update a rule status """
         if rule_status:
             url = "{0}/accounts/{1}/rules/{2}/status".format(
                 self.client.base_url, self.account.id, self.rule_id)
-            payload = { "status": rule_status }
+            payload = {"status": rule_status}
             data = json.dumps(payload)
             resp = requests.put(url, data=data, headers=get_auth_headers(
                 self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
@@ -110,5 +135,3 @@ class Rule:
             js = resp.json()
         else:
             raise ValueError("No rule information provided.")
-
-

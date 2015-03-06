@@ -26,6 +26,9 @@
 import authenticate
 import account
 import device
+import rules
 import submit_data
 import query_data
-import delete_all
+import invites
+import alerts
+# import delete_all

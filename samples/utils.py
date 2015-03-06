@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (c) 2015, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -23,36 +24,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-import json
-import os
-import errors
+import datetime
 
 
-def check(resp, code):
-    if resp.status_code != code:
-        raise RuntimeError(
-            "Expected {0}. Got {1} {2}".format(code, resp.status_code, resp.text))
-
-
-def get_auth_headers(token=None):
-    headers = {
-        #'Authorization': 'Bearer ' + token,
-        'content-type': 'application/json'
-    }
-    if token:
-        headers["Authorization"] = 'Bearer ' + token
-    return headers
-
-
-def prettyprint(js):
-    print json.dumps(js, sort_keys=True, indent=4, separators=(',', ': '))
-
-
-def update_properties(obj, var):
-    if obj and var:
-        for key, value in var.items():
-            setattr(obj, key, value)
-    else:
-        raise ValueError("Invalid object %s or dictionary." %
-                         (obj.__name__))
+def unix_to_realtime(sec):
+    return (
+        datetime.datetime.fromtimestamp(
+            int(sec)
+        ).strftime('%Y-%m-%d %H:%M:%S')
+    )
