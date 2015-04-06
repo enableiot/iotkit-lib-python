@@ -13,11 +13,11 @@ class Invites:
     client = None
     acct = None
 
-    def __init__(self, acct=None, client=None):
+    def __init__(self, account=None, client=None):
 
-        if acct:
-            self.client = acct.client
-            self.account = acct
+        if account:
+            self.client = account.client
+            self.account = account
         elif client:
             self.client = client
         else:
@@ -25,13 +25,16 @@ class Invites:
                 "Either account or connection object is required.")
 
     def get_account_invites(self):
-        url = "{0}/accounts/{1}/invites".format(
-            self.client.base_url, self.account.id)
-        resp = requests.get(url, headers=get_auth_headers(
-            self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
-        check(resp, 200)
-        js = resp.json()
-        return js
+        if self.account:
+            url = "{0}/accounts/{1}/invites".format(
+                self.client.base_url, self.account.id)
+            resp = requests.get(url, headers=get_auth_headers(
+                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+            js = resp.json()
+            return js
+        else:
+            raise ValueError("No account provided.")
 
     def get_user_invites(self, email):
         if email:
@@ -46,31 +49,37 @@ class Invites:
             raise ValueError("No email provided.")
 
     def add_invite(self, email):
-        if email:
-            url = "{0}/accounts/{1}/invites".format(
-                self.client.base_url, self.account.id)
-            payload = {
-                "email": email
-            }
-            data = json.dumps(payload)
-            resp = requests.post(url, data=data, headers=get_auth_headers(
-                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
-            check(resp, 201)
-            js = resp.json()
+        if self.account:
+            if email:
+                url = "{0}/accounts/{1}/invites".format(
+                    self.client.base_url, self.account.id)
+                payload = {
+                    "email": email
+                }
+                data = json.dumps(payload)
+                resp = requests.post(url, data=data, headers=get_auth_headers(
+                    self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+                check(resp, 201)
+                js = resp.json()
+            else:
+                raise ValueError("No email provided.")
         else:
-            raise ValueError("No email provided.")
+            raise ValueError("No account provided.")
 
     def delete_invites(self, email):
-        if email:
-            url = "{0}/accounts/{1}/invites/{2}".format(
-                self.client.base_url, self.account.id, urllib.quote(email))
-            resp = requests.delete(url, headers=get_auth_headers(
-                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
-            check(resp, 200)
-            js = resp.json()
-            return js
+        if self.account:
+            if email:
+                url = "{0}/accounts/{1}/invites/{2}".format(
+                    self.client.base_url, self.account.id, urllib.quote(email))
+                resp = requests.delete(url, headers=get_auth_headers(
+                    self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+                check(resp, 200)
+                js = resp.json()
+                return js
+            else:
+                raise ValueError("No email provided.")
         else:
-            raise ValueError("No email provided.")
+            raise ValueError("No account provided.")
 
     def accept_invite(self, email):
         if email:

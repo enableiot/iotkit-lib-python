@@ -32,15 +32,15 @@ import time
 import json
 import utils
 
-iot = iotkitclient.Connect(host=config.hostname)
+iot = iotkitclient.Request(host=config.hostname)
 iot.login(config.username, config.password)
 print "*** Connected. User ID: %s ..." % iot.user_id
 
-acct = iotkitclient.Account(iot)
+acct = iot.account()
 acct.get_account(config.account_name)
 print "*** Using Account: %s (%s)" % (acct.id, config.account_name)
 
-alert = iotkitclient.Alert(acct)
+alert = acct.alert()
 alerts = alert.get_alerts()
 print "*** Alerts (%d):" % len(alerts)
 for a in alerts:

@@ -28,14 +28,14 @@ hostname = "dashboard.us.enableiot.com"
 proxies = None
 
 # user account to use
-username = ""
-password = ""
+username = "bbaltz@yahoo.com"
+password = "Passw0rd"
 
 account_name = "test_acct"
 
 component_name = "temp"
 component_type = "temperature.v1.0"
 
-# user to invite to test account_name
-invitee_email = ""
-invitee_password = ""
+# 2nd user to invite to test account_name
+invitee_email = "foo@yopmail.com"
+invitee_password = "Passw0rd"

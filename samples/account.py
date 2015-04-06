@@ -28,11 +28,12 @@ import iotkitclient
 import config
 
 # Connect to IoT Analytics site and authenticate
-iot = iotkitclient.Connect(host=config.hostname, proxies=config.proxies)
+iot = iotkitclient.Request(host=config.hostname, proxies=config.proxies)
 iot.login(config.username, config.password)
 
 # Create IoT Analytics account instance
-acct = iotkitclient.Account(iot)
+acct = iot.account()
+print acct.client.base_url
 try:
     # check if account exists
     acct.get_account(config.account_name)

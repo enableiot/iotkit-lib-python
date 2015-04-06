@@ -36,11 +36,8 @@ class User:
     id = None
     client = None
 
-    def __init__(self, client):
+    def __init__(self, client=None):
         self.client = client
-        js = client.get_user_tokeninfo()
-        if js["payload"]["sub"]:
-            self.id = js["payload"]["sub"]
 
     def add_user(self, email, password, toc=True):
         if email and password:
@@ -56,24 +53,24 @@ class User:
             }
             url = "{0}/users".format(globals.base_url)
             data = json.dumps(payload)
-            # prettyprint(data)
-            resp = requests.post(url, data=data, headers=get_auth_headers(
-                self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
+            headers = {'content-type': 'application/json'}
+            resp = requests.post(url, data=data, headers=headers,
+                                 proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 201)
             js = resp.json()
             self.id = js["id"]
             return js
         else:
             raise ValueError("Invalid username or password.")
-        return None
 
-    def get_user_info(self):
+    def get_user_info(self, user_id=None):
         # Get the user's info
-        url = "{0}/users/{1}".format(globals.base_url, self.id)
+        url = "{0}/users/{1}".format(globals.base_url, user_id)
         resp = requests.get(url, headers=get_auth_headers(
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
+        self.id = js["id"]
         return js
 
     def delete_user(self, user_id):
@@ -112,29 +109,47 @@ class User:
             raise ValueError("No username, old or new password given.")
         return None
 
-    def find_accounts(self, account_name, firstAccountOnly=True):
-        accounts = []
-        if account_name:
-            js = self.get_info()
-            if js["accounts"]:
-                for account, value in js["accounts"].items():
-                    if value["name"] == account_name:
-                        accounts.append(account)
+    # def find_accounts(self, account_name, firstAccountOnly=True):
+    #     accounts = []
+    #     if account_name:
+    #         js = self.get_info()
+    #         if js["accounts"]:
+    #             for account, value in js["accounts"].items():
+    #                 if value["name"] == account_name:
+    #                     accounts.append(account)
+    #     else:
+    #         raise ValueError("No account_name given.")
+    #
+    #     if firstAccountOnly:
+    #         return accounts[0]
+    #     return accounts
+
+    def reset_password(self, reset_token=None, newpassword=None):
+        if reset_token and newpassword:
+            # given a user_id, get the user's info
+            url = "{0}/users/forgot_password".format(globals.base_url)
+            payload = {
+               "token": reset_token,
+               "password": newpassword
+            }
+            data = json.dumps(payload)
+            resp = requests.put(url, data=data, headers=globals.headers,
+                proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
         else:
-            raise ValueError("No account_name given.")
+            raise ValueError("No reset_token or password given.")
+        return None
 
-        if firstAccountOnly:
-            return accounts[0]
-        return accounts
 
-    def change_password(self):
-        pass
-
-    def update_user_role(self):
-        pass
-
-    def reset_password(self):
-        pass
-
-    def request_password_reset(self):
-        pass
+    def request_password_reset(self, email):
+        if email:
+            # given a user_id, get the user's info
+            url = "{0}/users/forgot_password".format(globals.base_url)
+            payload = { "email": email }
+            data = json.dumps(payload)
+            resp = requests.post(url, data=data, headers=globals.headers,
+                proxies=self.client.proxies, verify=globals.g_verify)
+            check(resp, 200)
+        else:
+            raise ValueError("No email given.")
+        return None

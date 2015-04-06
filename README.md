@@ -21,20 +21,23 @@ The library provides 6 classes
 * Rule
 * Control
 
-### Connect
-IoT Analytics Connection class 
+### Request
+IoT Analytics Request class
 ```
-connect_obj = Connect(host, proxies=None, username=None, password=None)
+request_obj = Request(host, proxies=None, username=None, password=None)
 get_user_tokeninfo():
 get_version():
 login(username, password):
 reinit(username, password):
+account(): create Account object
+user(): create User object
+invites(): create Invite object
+
 ```
 
 ### Account
 IoT Analytics Account Management class
 ```
-account_obj = Account(connect_obj)
 
 advanced_data_query(payload):
 aggregated_report(payload):
@@ -50,11 +53,16 @@ renew_activation_code():
 search_data(time0, time1, devices, components, csv=None):
 send_control_msg(payload):
 update_account(acct_info):
+device(): create Device object
+alert(): create Alert object
+rule(): create Rule object
+invites(): create Invite object
+user(): create User object
+componentCatalog(): create ComponentCatalog object
 ```
 ### Alert
 IoT Analytics Alert class
 ```
-alert_obj = Alert(acct):
 
 add_alert_comment(alert_id, alert_comment):
 get_alert(alert_id):
@@ -66,7 +74,6 @@ update_alert_status(alert_id, alert_status):
 ### Component
 IoT Analytics Component (Sensor) class
 ```
-component_obj = Component(device):
 
 def add_component(self, name, type):
 delete_component(self, cid):
@@ -76,7 +83,6 @@ get_component(self, component_name, cid=None):
 ### ComponentCatalog
 IoT Analytics Component Catalog class
 ```
-componentcatalog_obj = ComponentCatalog(acct=None):
 
 add_comp_type():
 get_comp_type():
@@ -87,7 +93,6 @@ update_comp_type():
 ### Device 
 IoT Analytics Device class
 ```
-device_obj = Device(account=None, id=None, client=None)
 
 activate_new_device(activation_code):
 create_device(device_info, activate=False):
@@ -101,12 +106,13 @@ package_data_series(dataSeries, cid, loc=None):
 save_config(configFile, overWrite=False):
 send_data(dataSeries):
 update_device(device_info, device_id=None):
+
+component() - Create Component object
 ```
 
 ### Invites
 IoT Analytics Invites class
 ```
-invite_obj = Invites(acct=None, client=None):
 
 accept_invite(email):
 add_invite(email):
@@ -118,7 +124,6 @@ get_user_invites(email):
 ### Rules
 IoT Analytics Rules class
 ```
-rule_obj = Rules(acct):
 
 add_draft_rule(rule_info):
 add_rule(rule_info):
@@ -133,18 +138,14 @@ update_rule_status(rule_status):
 ### User
 IoT Analytics User Management class
 ```
-user_obj = User(client):
 
-add_user(email, password, toc=True):
-change_password():
-change_password(username, oldpassword, newpassword):
-delete_user(user_id):
-find_accounts(account_name, firstAccountOnly=True):
-get_user_info():
-request_password_reset():
-reset_password():
-update_user(user_info):
-update_user_role():
+add_user(email, password, toc=True)
+get_user_info(user_id)
+delete_user(user_id)
+update_user(user_info)
+change_password(username, oldpassword, newpassword)
+reset_password(reset_token=None, newpassword)
+request_password_reset(email)
 ```
 
 

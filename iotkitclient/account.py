@@ -30,23 +30,21 @@ import globals
 from utils import check, get_auth_headers, update_properties, prettyprint
 import requests
 import json
+import device
+import alert
+import rule
+import user
+import invites
+import componentcatalog
 
-
-class Account:
+class Account(object):
 
     """ Create IoT Account instance
-
-        Args:
-        client (obj): IoT client connection instance containing
-        authorization token
 
     """
     id = None
     client = None
     info = None
-
-    def __init__(self, client):
-        self.client = client
 
     def create_account(self, account_name):
         """ Create a new account.
@@ -436,4 +434,32 @@ class Account:
             js = resp.json()
             return js
         else:
-            raise ValueException("device_id and start_time required")
+            raise ValueError("device_id and start_time required")
+
+    ######################################################
+    #  Subclasses
+    ######################################################
+
+    def device(self, id=None):
+        __device = device.Device(account=self, id=id, client=self.client)
+        return __device
+
+    def alert(self):
+        __alert = alert.Alert(account=self)
+        return __alert
+
+    def rule(self):
+        __rule = rule.Rule(account=self)
+        return __rule
+
+    def invites(self):
+        __invite = invites.Invites(account=self)
+        return __invite
+
+    def user(self):
+        __user = user.User(account=self)
+        return __user
+
+    def componentCatalog(self):
+        __componentCatalog = componentcatalog.ComponentCatalog(account=self)
+        return __componentCatalog

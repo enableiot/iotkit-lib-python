@@ -34,12 +34,12 @@ import random
 
 rule_name = "Test Rule " + str(int(random.random() * 100000))
 
-iot = iotkitclient.Connect(host=config.hostname)
+iot = iotkitclient.Request(host=config.hostname)
 iot.login(config.username, config.password)
 print "*** Connected. User ID: %s ..." % iot.user_id
-acct = iotkitclient.Account(iot)
+acct = iot.account()
 acct.get_account(config.account_name)
-rule = iotkitclient.Rule(acct)
+rule = acct.rule()
 rule_info = {
     "name": rule_name,
     "description": "This is a test rule",

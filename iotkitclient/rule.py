@@ -33,10 +33,11 @@ import json
 class Rule:
     rule_id = None
     info = None
+    account = None
 
-    def __init__(self, acct):
-        self.client = acct.client
-        self.account = acct
+    def __init__(self, account=None):
+        self.account = account
+        self.client = account.client
 
     def get_rules(self):
         """ Get list of rules for this account """

@@ -26,45 +26,71 @@
 
 import iotkitclient
 import config
-import time
-import json
+import random
 
 # Connect and login to the IoT cloud
 iot = iotkitclient.Request(host=config.hostname)
-iot.login(config.username, config.password)
-print "*** Connected. User ID: %s ..." % iot.user_id
-acct = iot.account()
-acct.get_account(config.account_name)
-print "*** Using Account: %s (%s)" % (acct.id, config.account_name)
-invite = acct.invites()
+#iot.login(config.username, config.password)
+print "*** Connected but not logged in."
 
-# Delete any pending invites
-invite_list = invite.get_account_invites()
-for user_email in invite_list:
-    print "  *** Deleting old invites for", user_email
-    invite.delete_invites(user_email)
+# Get user object
+user = iot.user()
 
-# Invite user to the account_name
-print "*** Adding invite for:", config.invitee_email
-invite.add_invite(config.invitee_email)
+email = "bongo@yopmail.com"
+password = "Wee45ee"
 
-# Display list of pending invites
-invite_list = acct.invites().get_account_invites()
-print "*** Pending invites for Account: %s" % config.account_name
-for email in invite_list:
-    print "   %s" % email
+# add test user
+print "** Adding new user: %s" % email
+info = user.add_user(email, password, toc=True)
+iotkitclient.prettyprint(info)
 
-# Connect and login to IoT cloud as invitee
-iot2 = iotkitclient.Request(host=config.hostname)
-iot2.login(config.invitee_email, config.invitee_password)
-acct2 = iot2.account()
-invite2 = acct2.invites()
+print "Please check your email and follow the verification link."
+raw_input("After clicking the link in the email, press [Enter] to continue.")
 
-# find invite and accept
-invite_list = invite2.get_user_invites(config.invitee_email)
-for item in invite_list:
-    invite_id = item["_id"]
-    print "*** Accepting invite:", invite_id
-    iotkitclient.prettyprint(invite2.accept_invite(invite_id))
-    print "*** Deleting invites for:", config.invitee_email
-    iotkitclient.prettyprint(invite.delete_invites(config.invitee_email))
+# login as new user
+iot.login(email, password)
+user_id = iot.user_id
+
+# get user info
+print "** Getting user information"
+info = user.get_user_info(user_id)
+iotkitclient.prettyprint(info)
+
+# update user
+user_info = {
+    "id": user_id,
+    "attributes":{
+        "phone":"123456789",
+        "test_attrib1":"test_value1",
+        "new":"next_string_value"
+    }
+}
+print "** Updating user information"
+user.update_user(user_info)
+info = user.get_user_info(user_id)
+iotkitclient.prettyprint(info)
+
+# change user password
+newpassword = "Woo45oo"
+user.change_password(email, password, newpassword)
+# login with new password
+iot.login(email, newpassword)
+
+# Request a password reset
+print "** Requesting password reset..."
+user.request_password_reset(email)
+print "Please check your email for a reset token"
+reset_token = raw_input("Enter the reset_token from the link in the password reset email (...?token=<reset_token>) and press [Enter] to continue.")
+user.reset_password(reset_token, password)
+print "   Password reset."
+
+# login with reset password
+iot.login(email, password)
+
+# Delete test user
+print "** Deleting test user %s (%s)" % (email, user_id)
+user.delete_user(user_id)
+
+
+
+

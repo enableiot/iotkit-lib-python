@@ -33,19 +33,17 @@ import json
 import uuid
 import os.path
 import time
-from connect import Connect
-
+import component
 
 class Device(object):
     device_id = None
     client = None
     account = None
     device_token = None
-    # device_name = None
-    # name = None
     info = None
+    account_id = None
 
-    def __init__(self, account=None, id=None, client=None):
+    def __init__(self, id=None, account=None, client=None):
         if account:
             self.client = account.client
             self.account = account
@@ -71,7 +69,6 @@ class Device(object):
             check(resp, 201)
             js = resp.json()
             self.device_id = js["deviceId"]
-            #update_properties(self, js)
             self.info = js
             if activate:
                 activation_code = self.account.renew_activation_code()
@@ -84,7 +81,6 @@ class Device(object):
         if os.path.isfile(configFile):
             js = open(configFile)
             data = json.load(js)
-            #update_properties(self, data)
             self.info = data
             self.device_id = self.info["deviceId"]
             self.device_token = self.info["device_token"]
@@ -123,21 +119,8 @@ class Device(object):
         check(resp, 200)
         js = resp.json()
         self.device_id = js["deviceId"]
-        #update_properties(self, js)
         self.info = js
         return js
-
-    # --- Not functional ----
-    # def search_devices(self, searchterms):
-        # if searchterms:
-        # url = "{0}/accounts/{1}/devices?{2}".format(
-        # self.client.base_url, self.account_id, searchterms)
-        # resp = requests.get(url, headers=get_auth_headers(
-        # self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
-        # check(resp, 200)
-        # js = resp.json()
-        # return js
-        # return None
 
     def update_device(self, device_info, device_id=None):
         if not device_id:
@@ -149,7 +132,6 @@ class Device(object):
             self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
         check(resp, 200)
         js = resp.json()
-        #update_properties(self, js)
         self.info = js
         return js
 
@@ -265,3 +247,7 @@ class Device(object):
 
             packagedSeries.append(js)
         return packagedSeries
+
+    def component(self):
+        __component = component.Component(device=self)
+        return __component

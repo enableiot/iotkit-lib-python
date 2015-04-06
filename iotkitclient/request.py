@@ -31,9 +31,11 @@ from utils import check, prettyprint, get_auth_headers
 import globals
 import json
 import requests
+import account
+import invites
+import user
 
-
-class Connect(object):
+class Request(object):
 
     """ IoT Analytics Cloud connection class
 
@@ -91,11 +93,10 @@ class Connect(object):
 
         try:
             url = "{0}/auth/token".format(self.base_url)
-            headers = {'content-type': 'application/json'}
             payload = {"username": username, "password": password}
             data = json.dumps(payload)
             resp = requests.post(
-                url, data=data, headers=headers, proxies=self.proxies, verify=globals.g_verify)
+                url, data=data, headers=globals.headers, proxies=self.proxies, verify=globals.g_verify)
             check(resp, 200)
             js = resp.json()
             self.user_token = js['token']
@@ -186,3 +187,19 @@ class Connect(object):
         check(resp, 200)
         js = resp.json()
         self.user_token = js['token']
+
+    ######################################################
+    #  Subclasses
+    ######################################################
+    def account(self):
+        __account = account.Account()
+        __account.client = self
+        return __account
+
+    def user(self):
+        __user = user.User(client=self)
+        return __user
+
+    def invites(self):
+        __invite = invites.Invites(client=self)
+        return __invite

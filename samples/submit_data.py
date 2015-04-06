@@ -30,12 +30,12 @@ import time
 
 # Connect to IoT Analytics site and authenticate
 print "Connecting to %s ..." % config.hostname
-iot = iotkitclient.Connect(host=config.hostname, proxies=config.proxies)
+iot = iotkitclient.Request(host=config.hostname, proxies=config.proxies)
 iot.login(config.username, config.password)
 print "Connected. User ID: %s ..." % iot.user_id
 
 # Link to a specific IoT Analytics account
-acct = iotkitclient.Account(iot)
+acct = iot.account()
 try:
     acct.get_account(config.account_name)
 except:
@@ -44,17 +44,17 @@ except:
 print "Using Account: %s ..." % config.account_name
 
 # Link to a specific device in the account
-device = iotkitclient.Device(acct)
+device = acct.device()
 device_id = iot.user_id + "_01"
 try:
     device.get_device(device_id)
 except Exception, ex:
-    raise RuntimeError(str(err))
+    raise RuntimeError(str(ex))
 
 device.load_config("device.json")
 print "Using Device: %s ..." % device_id
 
-comp = iotkitclient.Component(device)
+comp = device.component()
 if not comp.get_component(config.component_name):
     comp.add_component(config.component_name, config.component_type)
 

@@ -29,11 +29,11 @@ import config
 import time
 
 # Connect to IoT Analytics site and authenticate
-iot = iotkitclient.Connect(host=config.hostname, proxies=config.proxies)
+iot = iotkitclient.Request(host=config.hostname, proxies=config.proxies)
 iot.login(config.username, config.password)
 
 # Create IoT Analytics account instance
-acct = iotkitclient.Account(iot)
+acct = iot.account()
 try:
     # Check if account exists
     acct.get_account(config.account_name)
@@ -41,9 +41,9 @@ except Exception, err:
     raise RuntimeError("Unable to find account %s" % str(err))
 
 device_id = iot.user_id + "_01"
-device = iotkitclient.Device(acct, device_id)
+device = acct.device(device_id)
 
-comp = iotkitclient.Component(device)
+comp = device.component()
 comp.get_component(config.component_name)
 
 t0 = 0

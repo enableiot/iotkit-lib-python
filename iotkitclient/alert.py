@@ -31,10 +31,11 @@ import json
 
 
 class Alert:
+    account = None
 
-    def __init__(self, acct):
-        self.client = acct.client
-        self.account = acct
+    def __init__(self, account=None):
+        self.client = account.client
+        self.account = account
 
     # Get alerts for an account
     def get_alerts(self):
@@ -85,8 +86,8 @@ class Alert:
     def add_alert_comment(self, alert_id, alert_comment):
         if alert_id is not None and alert_comment is not None:
             url = "{0}/accounts/{1}/alerts/{2}/comments".format(
-                self.client.base_url, self.account.id, alert_id, alert_status)
-            data = json.sumps(alert_comment)
+                self.client.base_url, self.account.id, alert_id)
+            data = json.dumps(alert_comment)
             resp = requests.post(url, data=data, headers=get_auth_headers(
                 self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 200)

@@ -31,12 +31,13 @@ import json
 
 
 class Component:
+    account = None
+    id = None
 
-    def __init__(self, device):
+    def __init__(self, device=None):
         self.client = device.client
         self.account = device.account
         self.device = device
-        self.id = None
 
     def get_component(self, component_name, cid=None):
         info = self.device.get_device()

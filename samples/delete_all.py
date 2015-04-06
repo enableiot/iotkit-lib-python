@@ -29,22 +29,23 @@ import config
 import time
 
 # Connect to IoT Analytics site and authenticate
-iot = iotkitclient.Connect(host=config.hostname, proxies=config.proxies)
+iot = iotkitclient.Request(host=config.hostname, proxies=config.proxies)
 iot.login(config.username, config.password)
 
 # Link to a specific IoT Analytics account
-acct = iotkitclient.Account(iot)
+acct = iot.account()
 try:
     acct.get_account(config.account_name)
 
     # Link to a specific device in the account
-    device = iotkitclient.Device(acct)
     device_id = iot.user_id + "_01"
+    device = acct.device()
+
     try:
         device.get_device(device_id)
 
         # Delete all components named "temp" on this device
-        comp = iotkitclient.Component(device)
+        comp = device.component()
         while True:
             try:
                 comp.get_component(config.component_name)

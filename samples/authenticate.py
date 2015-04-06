@@ -29,7 +29,7 @@ import time
 
 # Connect to IoT Analytics site and authenticate
 print "Connecting to %s ..." % config.hostname
-iot = iotkitclient.Connect(host=config.hostname, proxies=config.proxies)
+iot = iotkitclient.Request(host=config.hostname, proxies=config.proxies)
 iot.login(config.username, config.password)
 print "Connected. User ID: %s ..." % iot.user_id
 

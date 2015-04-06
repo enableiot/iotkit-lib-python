@@ -44,12 +44,12 @@ msg = {
 
 # Connect to IoT Analytics site and authenticate
 print "Connecting to %s ..." % config.hostname
-iot = iotkitclient.Connect(host=config.hostname)
+iot = iotkitclient.Request(host=config.hostname)
 iot.login(config.username, config.password)
 print "Connected. User ID: %s ..." % iot.user_id
 
 # Link to a specific IoT Analytics account
-acct = iotkitclient.Account(iot)
+acct = iot.account()
 try:
     acct.get_account(config.account_name)
 except:
@@ -60,7 +60,7 @@ print "Using Account: %s ..." % config.account_name
 device_id = iot.user_id + "_01"
 
 # Link to a specific device in the account
-device = iotkitclient.Device(acct)
+device = acct.device()
 try:
     device.get_device(device_id)
 except:
@@ -80,7 +80,7 @@ print "Using Device: %s ..." % device_id
 # Set up actuator component - if it doesn't exist
 cname = "motor"
 ctype = "powerswitch.v1.0"
-comp = iotkitclient.Component(device)
+comp = device.component()
 if comp.get_component(cname):
     print "Found component:", comp.id
 else:
