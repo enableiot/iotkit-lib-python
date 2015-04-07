@@ -24,13 +24,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import globals
-from utils import *
+from utils import check, get_auth_headers
 import requests
-import uuid
 import json
 
 
-class Rule:
+class Rule(object):
     rule_id = None
     info = None
     account = None
@@ -53,9 +52,7 @@ class Rule:
         """ Create a rule as a draft """
         js = self.get_rules()
         for row in js:
-            print row["name"]
             if row["name"] == rule_name:
-                prettyprint(row)
                 return row["externalId"]
 
     def add_draft_rule(self, rule_info):

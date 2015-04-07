@@ -24,15 +24,17 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import globals
-from utils import *
+from utils import check, get_auth_headers
 import requests
 import uuid
 import json
 
 
-class Component:
+class Component(object):
     account = None
     id = None
+    name = None
+    type = None
 
     def __init__(self, device=None):
         self.client = device.client
@@ -41,7 +43,6 @@ class Component:
 
     def get_component(self, component_name, cid=None):
         info = self.device.get_device()
-        prettyprint(info)
         if 'components' in info:
             components = info["components"]
             for c in components:

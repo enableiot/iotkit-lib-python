@@ -27,13 +27,13 @@
 Methods for IoT Analytics device management and data submission
 """
 import globals
-from utils import *
+from utils import check, get_auth_headers
 import requests
 import json
-import uuid
 import os.path
 import time
 import component
+
 
 class Device(object):
     device_id = None
@@ -222,7 +222,6 @@ class Device(object):
 
     def send_data(self, dataSeries):
         url = "{0}/data/{1}".format(self.client.base_url, self.device_id)
-        print url
         payload = {
             "on": time.time(),
             "accountId": self.account_id,

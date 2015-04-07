@@ -39,7 +39,7 @@ acct.get_account(config.account_name)
 print "*** Using Account: %s (%s)" % (acct.id, config.account_name)
 
 # Get component type catalog object for test account
-catalog = acct.componentCatalog()
+catalog = acct.component_catalog()
 print "*** Listing existing Component Catalog"
 # find latest temperature sensor version
 sensor_version = "1.0"

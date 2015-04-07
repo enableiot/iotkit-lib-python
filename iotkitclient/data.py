@@ -7,7 +7,7 @@ import requests
 import time
 
 
-class Data:
+class Data(object):
 
     def __init__(self, account):
         self.client = account.client

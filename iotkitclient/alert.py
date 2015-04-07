@@ -30,7 +30,7 @@ import uuid
 import json
 
 
-class Alert:
+class Alert(object):
     account = None
 
     def __init__(self, account=None):

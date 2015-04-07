@@ -27,15 +27,15 @@
 Methods for IoT Analytics account management
 """
 import globals
-from utils import check, get_auth_headers, update_properties, prettyprint
+from utils import check, get_auth_headers
 import requests
 import json
 import device
 import alert
 import rule
-import user
 import invites
 import componentcatalog
+
 
 class Account(object):
 
@@ -456,10 +456,6 @@ class Account(object):
         __invite = invites.Invites(account=self)
         return __invite
 
-    def user(self):
-        __user = user.User(account=self)
-        return __user
-
-    def componentCatalog(self):
-        __componentCatalog = componentcatalog.ComponentCatalog(account=self)
-        return __componentCatalog
+    def component_catalog(self):
+        __component_catalog = componentcatalog.ComponentCatalog(account=self)
+        return __component_catalog

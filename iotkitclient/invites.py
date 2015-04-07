@@ -2,14 +2,13 @@
 Methods for IoT Analytics user invites
 """
 import globals
-from utils import *
+from utils import check, get_auth_headers
 import requests
-import uuid
 import json
 import urllib
 
 
-class Invites:
+class Invites(object):
     client = None
     acct = None
 

@@ -2,13 +2,13 @@
 Methods for IoT Analytics component type catalog
 """
 from globals import *
-from utils import *
+from utils import check, get_auth_headers
 import globals
 import requests
 import json
 
 
-class ComponentCatalog:
+class ComponentCatalog(object):
     account = None
 
     def __init__(self, account=None):
@@ -18,7 +18,7 @@ class ComponentCatalog:
     def add_comp_type(self, component_info=None):
         if component_info:
             url = "{0}/accounts/{1}/cmpcatalog".format(self.client.base_url,
-                                                           self.account.id)
+                                                       self.account.id)
             data = json.dumps(component_info)
             resp = requests.post(url, data=data, headers=get_auth_headers(
                 self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
@@ -30,7 +30,7 @@ class ComponentCatalog:
 
     def get_comp_types(self, full=False):
         url = "{0}/accounts/{1}/cmpcatalog".format(self.client.base_url,
-                                                       self.account.id)
+                                                   self.account.id)
         if full == True:
             url += "?full=true"
         resp = requests.get(url, headers=get_auth_headers(

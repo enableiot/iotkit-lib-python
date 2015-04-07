@@ -27,13 +27,14 @@
 Methods for IoT Analytics Cloud connections
 
 """
-from utils import check, prettyprint, get_auth_headers
+from utils import check, get_auth_headers
 import globals
 import json
 import requests
 import account
 import invites
 import user
+
 
 class Request(object):
 
@@ -95,8 +96,9 @@ class Request(object):
             url = "{0}/auth/token".format(self.base_url)
             payload = {"username": username, "password": password}
             data = json.dumps(payload)
-            resp = requests.post(
-                url, data=data, headers=globals.headers, proxies=self.proxies, verify=globals.g_verify)
+            resp = requests.post(url, data=data,
+                                 headers=globals.headers, proxies=self.proxies,
+                                 verify=globals.g_verify)
             check(resp, 200)
             js = resp.json()
             self.user_token = js['token']

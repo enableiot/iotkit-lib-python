@@ -27,12 +27,12 @@
 Methods for IoT Analytics user management
 """
 import globals
-from utils import *
+from utils import check, get_auth_headers
 import requests
 import json
 
 
-class User:
+class User(object):
     id = None
     client = None
 
@@ -129,26 +129,25 @@ class User:
             # given a user_id, get the user's info
             url = "{0}/users/forgot_password".format(globals.base_url)
             payload = {
-               "token": reset_token,
-               "password": newpassword
+                "token": reset_token,
+                "password": newpassword
             }
             data = json.dumps(payload)
             resp = requests.put(url, data=data, headers=globals.headers,
-                proxies=self.client.proxies, verify=globals.g_verify)
+                                proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 200)
         else:
             raise ValueError("No reset_token or password given.")
         return None
 
-
     def request_password_reset(self, email):
         if email:
             # given a user_id, get the user's info
             url = "{0}/users/forgot_password".format(globals.base_url)
-            payload = { "email": email }
+            payload = {"email": email}
             data = json.dumps(payload)
             resp = requests.post(url, data=data, headers=globals.headers,
-                proxies=self.client.proxies, verify=globals.g_verify)
+                                 proxies=self.client.proxies, verify=globals.g_verify)
             check(resp, 200)
         else:
             raise ValueError("No email given.")
