@@ -36,16 +36,8 @@ print "*** Connected but not logged in."
 # Get user object
 user = iot.user()
 
-email = "bongo@yopmail.com"
-password = "Wee45ee"
-
-# add test user
-print "** Adding new user: %s" % email
-info = user.add_user(email, password, toc=True)
-iotkitclient.prettyprint(info)
-
-print "Please check your email and follow the verification link."
-raw_input("After clicking the link in the email, press [Enter] to continue.")
+email = config.username
+password = config.password
 
 # login as new user
 iot.login(email, password)
@@ -88,8 +80,8 @@ print "   Password reset."
 iot.login(email, password)
 
 # Delete test user
-print "** Deleting test user %s (%s)" % (email, user_id)
-user.delete_user(user_id)
+#print "** Deleting test user %s (%s)" % (email, user_id)
+#user.delete_user(user_id)
 
 
 

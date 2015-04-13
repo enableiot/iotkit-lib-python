@@ -47,24 +47,6 @@ class Invites(object):
         else:
             raise ValueError("No email provided.")
 
-    def add_invite(self, email):
-        if self.account:
-            if email:
-                url = "{0}/accounts/{1}/invites".format(
-                    self.client.base_url, self.account.id)
-                payload = {
-                    "email": email
-                }
-                data = json.dumps(payload)
-                resp = requests.post(url, data=data, headers=get_auth_headers(
-                    self.client.user_token), proxies=self.client.proxies, verify=globals.g_verify)
-                check(resp, 201)
-                js = resp.json()
-            else:
-                raise ValueError("No email provided.")
-        else:
-            raise ValueError("No account provided.")
-
     def delete_invites(self, email):
         if self.account:
             if email:

@@ -39,30 +39,6 @@ class User(object):
     def __init__(self, client=None):
         self.client = client
 
-    def add_user(self, email, password, toc=True):
-        if email and password:
-            # given a user_id, get the user's info
-            # if toc:
-                # toc = "true"
-            # else:
-                # toc = "false"
-            payload = {
-                "email": email,
-                "password": password,
-                "termsAndConditions": toc
-            }
-            url = "{0}/users".format(globals.base_url)
-            data = json.dumps(payload)
-            headers = {'content-type': 'application/json'}
-            resp = requests.post(url, data=data, headers=headers,
-                                 proxies=self.client.proxies, verify=globals.g_verify)
-            check(resp, 201)
-            js = resp.json()
-            self.id = js["id"]
-            return js
-        else:
-            raise ValueError("Invalid username or password.")
-
     def get_user_info(self, user_id=None):
         # Get the user's info
         url = "{0}/users/{1}".format(globals.base_url, user_id)

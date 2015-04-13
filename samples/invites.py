@@ -44,10 +44,6 @@ for user_email in invite_list:
     print "  *** Deleting old invites for", user_email
     invite.delete_invites(user_email)
 
-# Invite user to the account_name
-print "*** Adding invite for:", config.invitee_email
-invite.add_invite(config.invitee_email)
-
 # Display list of pending invites
 invite_list = acct.invites().get_account_invites()
 print "*** Pending invites for Account: %s" % config.account_name
